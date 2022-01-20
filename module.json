@@ -1,0 +1,20 @@
+{
+    "name": "rotating-square-template",
+    "title": "Rotating Square Template",
+    "description": "Allows rotated placement of square templates",
+    "authors": [
+        {
+            "name": "Tero Parvinen"
+        }
+    ],
+    "version": "1.0",
+    "minimumCoreVersion": "9",
+    "compatibleCoreVersion": "9",
+    "esmodules": [
+        "./module/rotating-square-template.js"
+    ],
+    "url": "https://github.com/teroparvinen/foundry-rotating-square-template",
+    "bugs": "https://github.com/teroparvinen/foundry-rotating-square-template/issues",
+    "manifest": "https://github.com/teroparvinen/foundry-rotating-square-template/releases/latest/download/module.json",
+    "download": "https://github.com/teroparvinen/foundry-rotating-square-template/releases/latest/download/module.zip"
+}
