@@ -1,8 +1,8 @@
 Hooks.on('init', () => {
     CONFIG.MeasuredTemplate.objectClass.prototype._getRectShape = function(direction, distance) {
         let r = Ray.fromAngle(0, 0, direction, distance),
-            dx = r.dx,
-            dy = r.dy;
+            dx = r.dx - r.dy,
+            dy = r.dy + r.dx;
 
         const points = [
             dx, dy,
@@ -20,7 +20,7 @@ Hooks.on('init', () => {
         if ( this.data.t === "rect" ) {
             const u = canvas.scene.data.gridUnits;
 
-            const d = Math.round(2 * this.data.distance * 10 / Math.sqrt(2)) / 10;
+            const d = Math.round(2 * this.data.distance * 10) / 10;
             const text = `${d}${u}`;
       
             this.hud.ruler.text = text;
