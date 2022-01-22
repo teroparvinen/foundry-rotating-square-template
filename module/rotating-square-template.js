@@ -29,4 +29,18 @@ Hooks.on('init', () => {
             return previous.apply(this);
         }
     };
+
+    if (game.dnd5e) {
+        const prevFromItem = game.dnd5e.canvas.AbilityTemplate.fromItem;
+        game.dnd5e.canvas.AbilityTemplate.fromItem = function(item) {
+            const object = prevFromItem.apply(this, [item]);
+            if (object.data.t == "rect") {
+                object.data.update({
+                    direction: 0,
+                    distance: object.data.distance / (2*Math.sqrt(2))
+                });
+            }
+            return object;
+        }
+    }
 });
