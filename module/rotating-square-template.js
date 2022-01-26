@@ -1,5 +1,7 @@
+const moduleId = 'rotating-square-template';
+
 Hooks.on('init', () => {
-    CONFIG.MeasuredTemplate.objectClass.prototype._getRectShape = function(direction, distance) {
+    const getRectShape = function(direction, distance) {
         let r = Ray.fromAngle(0, 0, direction, distance),
             dx = r.dx - r.dy,
             dy = r.dy + r.dx;
@@ -15,9 +17,11 @@ Hooks.on('init', () => {
         return new PIXI.Polygon(points);
     };
 
-    const previous = CONFIG.MeasuredTemplate.objectClass.prototype._refreshRulerText;
-    CONFIG.MeasuredTemplate.objectClass.prototype._refreshRulerText = function() {
+    const refreshRulerText = function(prev) {
         if ( this.data.t === "rect" ) {
+            // Silence libWrapper warnings
+            prev.apply(this);
+
             const u = canvas.scene.data.gridUnits;
 
             const d = Math.round(2 * this.data.distance * 10) / 10;
@@ -26,14 +30,30 @@ Hooks.on('init', () => {
             this.hud.ruler.text = text;
             this.hud.ruler.position.set(this.ray.dx + 10, this.ray.dy + 5);
         } else {
-            return previous.apply(this);
+            return prev.apply(this);
         }
     };
 
+    if (typeof libWrapper === 'function') {
+        libWrapper.register(moduleId, 'MeasuredTemplate.prototype._getRectShape', function(wrapped, ...args) {
+            wrapped.apply(this, args);
+            return getRectShape.apply(this, args);            
+        });
+        libWrapper.register(moduleId, 'MeasuredTemplate.prototype._refreshRulerText', function(wrapped, ...args) {
+            return refreshRulerText.apply(this, [wrapped, ...args]);
+        });
+    } else {
+        CONFIG.MeasuredTemplate.objectClass.prototype._getRectShape = getRectShape;
+
+        const previousRulerText = CONFIG.MeasuredTemplate.objectClass.prototype._refreshRulerText;
+        CONFIG.MeasuredTemplate.objectClass.prototype._refreshRulerText = function(...args) {
+            return refreshRulerText.apply(this, [previousRulerText, ...args]);
+        };
+    }
+
     if (game.dnd5e) {
-        const prevFromItem = game.dnd5e.canvas.AbilityTemplate.fromItem;
-        game.dnd5e.canvas.AbilityTemplate.fromItem = function(item) {
-            const object = prevFromItem.apply(this, [item]);
+        const fromItem = function(prev, item) {
+            const object = prev.apply(this, [item]);
             if (object.data.t == "rect") {
                 object.data.update({
                     direction: 0,
@@ -41,6 +61,17 @@ Hooks.on('init', () => {
                 });
             }
             return object;
+        }
+
+        if (typeof libWrapper === 'function') {
+            libWrapper.register(moduleId, 'game.dnd5e.canvas.AbilityTemplate.fromItem', function(wrapped, ...args) {
+                return fromItem.apply(this, [wrapped, ...args]);
+            });
+        } else {
+            const prevFromItem = game.dnd5e.canvas.AbilityTemplate.fromItem;
+            game.dnd5e.canvas.AbilityTemplate.fromItem = function(...args) {
+                return fromItem.apply(this, [prevFromItem, ...args]);
+            }
         }
     }
 });
