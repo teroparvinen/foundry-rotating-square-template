@@ -18,17 +18,17 @@ Hooks.on('init', () => {
     };
 
     const refreshRulerText = function(prev) {
-        if ( this.data.t === "rect" ) {
+        if ( this.document.t === "rect" ) {
             // Silence libWrapper warnings
             prev.apply(this);
 
-            const u = canvas.scene.data.gridUnits;
+            const u = canvas.scene.grid.units;
 
-            const d = Math.round(2 * this.data.distance * 10) / 10;
+            const d = Math.round(2 * this.document.distance * 10) / 10;
             const text = `${d}${u}`;
-      
-            this.hud.ruler.text = text;
-            this.hud.ruler.position.set(this.ray.dx + 10, this.ray.dy + 5);
+
+            this.ruler.text = text;
+            this.ruler.position.set(this.ray.dx + 10, this.ray.dy + 5);
         } else {
             return prev.apply(this);
         }
@@ -37,7 +37,7 @@ Hooks.on('init', () => {
     if (typeof libWrapper === 'function') {
         libWrapper.register(moduleId, 'MeasuredTemplate.prototype._getRectShape', function(wrapped, ...args) {
             wrapped.apply(this, args);
-            return getRectShape.apply(this, args);            
+            return getRectShape.apply(this, args);
         });
         libWrapper.register(moduleId, 'MeasuredTemplate.prototype._refreshRulerText', function(wrapped, ...args) {
             return refreshRulerText.apply(this, [wrapped, ...args]);
@@ -54,10 +54,10 @@ Hooks.on('init', () => {
     if (game.dnd5e) {
         const fromItem = function(prev, item) {
             const object = prev.apply(this, [item]);
-            if (object.data.t == "rect") {
-                object.data.update({
+            if (object.document.t == "rect") {
+                object.document.update({
                     direction: 0,
-                    distance: object.data.distance / (2*Math.sqrt(2))
+                    distance: object.document.distance / (2*Math.sqrt(2))
                 });
             }
             return object;
